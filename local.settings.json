@@ -11,5 +11,8 @@
     "PRODUCT_DATA_DIR": "D:\\AIWORK\\ai-product-agent\\data"
   },
   "ConnectionStrings": {},
-  "Host": {}
+    "Host": {
+    "CORS": "https://dreadful-broomstick-67v6jwv7x69cx4vq-8000.app.github.dev,https://dreadful-broomstick-67v6jwv7x69cx4vq-7071.app.github.dev",
+    "CORSCredentials": false
+  }
 }
