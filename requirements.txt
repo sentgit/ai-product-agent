@@ -1,0 +1,13 @@
+
+
+azure-functions==1.20.0
+pydantic==2.8.2
+langgraph==0.2.56
+langchain==0.3.7
+langchain-openai==0.2.10
+openai==1.56.2
+pandas
+python-dotenv
+certifi
+
+

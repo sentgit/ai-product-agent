@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SKF Product Assistant</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      background: #f6f6f6; /* updated */
+      color: #495057; /* updated */
+    }
+
+    .container { display: flex; height: 100vh; }
+
+    .left-panel {
+      width: 30%;
+      background: #fcfcfd; /* updated */
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      
+    }
+    .connection-section { flex: 1; display: flex; flex-direction: column; }
+    .connection-section h2 { font-size: 14px; margin-bottom: 20px; color: #495057; font-weight: 600; }
+    .connection-controls { flex: 1; }
+    .app-title { margin-top: auto; padding-top: 20px; border-top: 1px solid #e2e3e5; text-align: center; }
+    .app-title h3 { font-size: 14px; color: #495057; font-weight: 600; margin-bottom: 5px; }
+    .app-title p { font-size: 12px; color: #495057; }
+
+    .card { margin-top: 16px; }
+    .card h3 { font-size: 14px; color: #495057; font-weight: 600; margin-bottom: 12px; }
+    
+    .file-input-wrapper { 
+      position: relative; 
+      margin: 12px 0; 
+      overflow: hidden;
+    }
+    
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      left: -9999px;
+      opacity: 0;
+    }
+    
+    .file-input-label {
+      display: block;
+      width: 100%; 
+      padding: 10px 12px; 
+      border: 1px solid #e2e3e5; 
+      border-radius: 6px;
+      font-size: 12px; 
+      background: #ffffff; 
+      color: #495057;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .file-input-label:hover:not(.disabled) {
+      border-color: #0000fe;
+      background: #fafafa;
+    }
+    
+    .file-input-label.disabled {
+      background: #f5f5f5;
+      color: #9E9E9E;
+      cursor: not-allowed;
+      border-color: #e2e3e5;
+    }
+    
+    .file-input-label.has-file {
+      color: #0000fe;
+      font-weight: 500;
+    }
+    
+    .upload-status {
+      margin-top: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      background: #f5f5f5;
+      border: 1px solid #e2e3e5;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      color: #495057;
+    }
+    .upload-status:empty {
+      display: none;
+    }
+
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-size: 12px; color: #495057; margin-bottom: 5px; font-weight: 500; }
+    .input-group input {
+      width: 100%; padding: 10px; border: 1px solid #e2e3e5; /* updated */ border-radius: 6px;
+      font-size: 14px; transition: border-color 0.2s; background: #ffffff; color: #495057; /* updated */
+    }
+    .input-group input:focus { outline: none; border-color: #0000fe; /* updated */ }
+
+    .connect-btn {
+      width: 100%; padding: 12px; background: #0000fe; /* updated */ color: #ffffff; border: none; border-radius: 6px;
+      font-size: 12px; font-weight: 400; cursor: pointer; transition: all 0.2s;
+    }
+    .connect-btn:hover { background: #0000cc; /* slight hover */ }
+    .connect-btn:disabled { background: #e2e3e5; /* updated */ color: #8a8a8a; cursor: not-allowed; }
+
+    .status { margin-top: 15px; padding: 10px; border-radius: 6px; font-size: 12px; text-align: center; font-weight: 500; }
+    .status.connected { background: rgba(0, 0, 254, 0.06); color: #0000fe; border: 1px solid #0000fe; /* updated */ }
+    .status.disconnected { background: rgba(0,0,0,0.02); color: #9E9E9E; border: 1px solid #e2e3e5; /* updated */ }
+    .status.connecting { background: rgba(0, 0, 254, 0.10); color: #0000fe; border: 1px solid #0000fe; /* updated */ }
+    .space-panel { width: 5%; background: #f6f6f6; flex: auto; flex-direction: column;z-index: 2;}
+    .right-panel {
+      width: 60%;
+      display: flex;
+      flex-direction: column;
+      background: #f6f6f6; /* updated */
+      position: relative;
+      z-index: 2;
+
+      
+    }
+
+    @keyframes glowPulse {
+      0%   { box-shadow: 0 0 20px rgba(238, 238, 238, 0.25); }
+      50%  { box-shadow: 0 0 20px rgba(238, 238, 238, 0.25); }
+      100% { box-shadow: 0 0 20px rgba(238, 238, 238, 0.25); }
+    }
+    .right-panel.active-glow { animation: glowPulse 2s ease-in-out infinite; border-left: 1px solid rgba(238, 238, 238, 0.25); }
+
+    .chat-messages {
+      flex: 1; 
+      overflow-y: auto; 
+      padding: 20px 0;
+      display: flex;
+      flex-direction: column; 
+      gap: 15px; 
+      scroll-behavior: smooth;
+    }
+    .chat-messages::-webkit-scrollbar { width: 2px; }
+    .chat-messages::-webkit-scrollbar-track { background: #f6f6f6; border-radius: 50px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #0000fe, #0000fe); border-radius: 10px; }
+    .chat-messages::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #0000fe, #0000fe); }
+    .chat-messages { scrollbar-width: thin; scrollbar-color: #0000fe #f6f6f6; }
+
+    .message { 
+      display: flex; 
+      gap: 12px; 
+      animation: fadeIn 0.3s; 
+      max-width: 780px; 
+      width: 100%; 
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }
+
+    .message-avatar {
+      width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 100; font-size: 14px; flex-shrink: 0;
+      color: #ffffff;
+    }
+    .message.user .message-avatar { background: #495057; /* updated to match text tone */ }
+    .message.assistant .message-avatar { background: #0000fe; /* updated */ }
+
+    .message-content { padding: 8px 8px; font-size: 14px; line-height: 1.5; word-wrap: break-word; color: #495057; /* updated */ }
+    .message.user .message-content { color: #495057; /* updated */ }
+
+    .typing-indicator { 
+      display: none; 
+      padding: 12px 16px; 
+      background: #f5f5f5; 
+      border: 0px solid #e2e3e5; 
+      border-radius: 12px; 
+      width: fit-content; 
+      max-width: 780px;
+      margin: 0 auto 15px auto;
+    }
+    .typing-indicator.active { display: block; }
+    .typing-indicator span { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #0000fe; /* updated */ margin-right: 4px; animation: bounce 1.4s infinite; }
+    .typing-indicator span:nth-child(2) { animation-delay: .2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: .4s; }
+    @keyframes bounce { 0%,60%,100%{ transform:translateY(0);} 30%{ transform:translateY(-8px);} }
+
+    .input-area { position: sticky; bottom: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #f5f5f5 20%); /* updated */ padding: 16px 16px; }
+    .input-container {
+      display: flex; align-items: flex-end; gap: 10px; max-width: 780px; margin: 0 auto; padding: 8px;
+      border: 1px solid #e2e3e5; /* updated */ border-radius: 12px; background: #ffffff; box-shadow: 0 6px 24px rgba(220, 220, 220, 0.25);
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .input-container:focus-within { border-color: #e2e3e5; /* updated */ box-shadow: 0 0 0 1px #d9dadc; /* subtle */
+    transition: border-color .2s, box-shadow .2s; }
+    .input-container textarea {
+      flex: 1; border: none; outline: none; background: transparent; color: #495057; /* updated */
+      font-size: 14px; line-height: 1.5; padding: 10px 12px; resize: none; max-height: 160px; overflow-y: auto; caret-color: #0000fe; /* updated */
+    }
+    .input-container textarea::placeholder { color: #9E9E9E; }
+
+    .send-btn {
+      padding: 10px 16px; background: #ffffff; /* updated */ color: #0000fe; border: none; border-radius: 12px; font-size: 20px; 
+      font-weight: 800;
+      cursor: pointer; transition: background .2s, transform .05s; flex-shrink: 0;
+    }
+    .send-btn:hover:not(:disabled) { background: #ffffff; }
+    .send-btn:active:not(:disabled) { transform: translateY(1px); }
+    .send-btn:disabled { background: #ffffff; /* updated */ color: #9E9E9E; cursor: not-allowed; }
+
+    .welcome-message { 
+      text-align: center; 
+      color: #9E9E9E; 
+      margin-top: 40px; 
+      font-size: 18px; 
+      max-width: 780px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0 16px;
+      align-self: flex-start;
+    }
+
+    .badge-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; line-height: 1.5;}
+    .pill { font-size: 11px; padding: 4px 8px; border-radius: 999px; border: 1px solid #efefef; background: #f5f5f5; 
+      color: #393939; }
+    .pill.good { color:#10b981; border-color:#10b981; background:#f5f5f5; }
+    .pill.warn { color:#f59e0b; border-color:#f59e0b; background:#f5f5f5; }
+    .pill.danger { color:#ef4444; border-color:#ef4444; background:#f5f5f5; }
+
+    .stream-line{line-height: 0.5 ; padding:6px 8px;margin-top:1px;background:none;border:0px solid #1f2937;border-radius:1px;overflow-wrap:anywhere;font-size:12px;color:#393939 }
+    .stream-line .stream-tag{ display:inline-block;font-size:14px;padding:2px 6px;margin-right:8px;border-radius:8px;border:0px solid #1f3b66;background:none;color:#393939 }
+    .stream-line.final{ background: #ffffff;min-height: 50px;color:#000021;font-weight:600;border:none;line-height: 1.5;border-radius: 5px }
+    .stream-line.final .stream-tag{ font-size: 11px; padding: 2px 2px; border-radius: 999px; 
+      border: 1px solid #efefef; background: #e8e8e8; color: #393939;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left-panel">
+      <div class="connection-section">
+        <h2>Connection Settings</h2>
+        <div class="connection-controls">
+          <div class="input-group">
+            <label>API Endpoint</label>
+            <input type="text" id="endpoint" value="http://localhost:7071/api/chat" placeholder="http://localhost:7071/api/chat" />
+          </div>
+          <button class="connect-btn" id="connectBtn">Connect</button>
+          <div class="status disconnected" id="status">Disconnected</div>
+        </div>
+        <div class="card">
+          <h3>Upload Product JSON</h3>
+          <div class="file-input-wrapper">
+            <input id="fileInput" type="file" accept=".json" disabled />
+            <label id="fileInputLabel" for="fileInput" class="file-input-label disabled">
+              Choose JSON file...
+            </label>
+          </div>
+          <button id="uploadBtn" class="connect-btn" disabled>Upload</button>
+          <div id="uploadStatus" class="upload-status"></div>
+        </div>
+        <div class="app-title">
+          <h3>SKF Product Assistant - AI Agent</h3>
+          <p>Powered by Python, Langgraph, and Azure Functions
+            
+          </p>
+        </div>
+      </div>
+    </div>
+     
+    <div class="right-panel" id="rightPanel">
+      
+        <div class="chat-messages" id="chatMessages">
+          <div class="welcome-message">Welcome! Connect to the API and start chatting about SKF products.</div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator"><span></span><span></span><span></span></div>
+
+        <div class="input-area">
+          <div class="input-container">
+            <textarea id="messageInput" rows="1" placeholder="Message SKF Assistant… (Shift+Enter for newline)" disabled></textarea>
+            <button class="sendBtn send-btn" id="sendBtn" disabled>➤</button>
+          </div>
+        </div>
+    </div>
+     
+
+  </div>
+
+<script>
+(function initSessionHelpers(){
+  if (!window.SESSION_KEY) window.SESSION_KEY = "agent_session_state";
+  if (!window.getSessionState) {
+    window.getSessionState = function(){
+      const saved = sessionStorage.getItem(window.SESSION_KEY);
+      return saved ? JSON.parse(saved) : { session_id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())), history: [] };
+    };
+  }
+  if (!window.saveSessionState) {
+    window.saveSessionState = function(state){
+      sessionStorage.setItem(window.SESSION_KEY, JSON.stringify(state));
+    };
+  }
+  if (!window.clearSessionState) {
+    window.clearSessionState = function(){
+      sessionStorage.removeItem(window.SESSION_KEY);
+    };
+  }
+})();
+</script>
+
+  <script>
+    let apiEndpoint = '';
+    let isConnected = false;
+
+    const elements = {
+      endpoint: document.getElementById('endpoint'),
+      connectBtn: document.getElementById('connectBtn'),
+      status: document.getElementById('status'),
+      chatMessages: document.getElementById('chatMessages'),
+      messageInput: document.getElementById('messageInput'),
+      sendBtn: document.getElementById('sendBtn'),
+      typingIndicator: document.getElementById('typingIndicator'),
+      rightPanel: document.getElementById('rightPanel'),
+      fileInput: document.getElementById('fileInput'),
+      fileInputLabel: document.getElementById('fileInputLabel'),
+      uploadBtn: document.getElementById('uploadBtn'),
+      uploadStatus: document.getElementById('uploadStatus'),
+    };
+
+    elements.connectBtn.addEventListener('click', async () => {
+      const endpoint = elements.endpoint.value.trim();
+      if (!endpoint) { alert('Please enter an API endpoint'); return; }
+
+      elements.connectBtn.disabled = true;
+      updateStatus('connecting', 'Connecting...');
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: 'Hello' })
+        });
+
+        if (response.ok) {
+          apiEndpoint = endpoint;
+          isConnected = true;
+          updateStatus('connected', 'Connected ✓');
+          elements.messageInput.disabled = false;
+          elements.sendBtn.disabled = false;
+          elements.fileInput.disabled = false;
+          elements.fileInputLabel.classList.remove('disabled');
+          elements.uploadBtn.disabled = false;
+          elements.messageInput.focus();
+          elements.chatMessages.innerHTML = '';
+        } else {
+          throw new Error(`HTTP ${response.status}`);
+        }
+      } catch (err) {
+        updateStatus('disconnected', 'Connection failed');
+        alert(`Failed to connect: ${err.message}`);
+      } finally {
+        elements.connectBtn.disabled = false;
+      }
+    });
+
+    elements.sendBtn.addEventListener('click', sendMessage);
+    elements.messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+    elements.messageInput.addEventListener('input', () => autoGrow(elements.messageInput));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && e.code === 'KeyC') {
+        clearSession();
+      }
+    });
+    elements.status.addEventListener('dblclick', clearSession);
+
+    elements.fileInput.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        elements.fileInputLabel.textContent = file.name;
+        elements.fileInputLabel.classList.add('has-file');
+      } else {
+        elements.fileInputLabel.textContent = 'Choose JSON file...';
+        elements.fileInputLabel.classList.remove('has-file');
+      }
+    });
+
+    function autoGrow(el) {
+      const max = 160;
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, max) + 'px';
+      el.style.overflowY = el.scrollHeight > max ? 'auto' : 'hidden';
+    }
+
+    function updateStatus(type, text) {
+      elements.status.className = `status ${type}`;
+      elements.status.textContent = text;
+    }
+
+    function addMessage(type, content) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${type}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'message-avatar';
+      avatar.textContent = type === 'user' ? 'U' : 'A';
+
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'message-content';
+      contentDiv.textContent = content;
+
+      msgDiv.appendChild(avatar);
+      msgDiv.appendChild(contentDiv);
+      elements.chatMessages.appendChild(msgDiv);
+      scrollToBottom();
+    }
+
+    function addAssistantScaffold() {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message assistant';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'message-avatar';
+      avatar.textContent = 'A';
+
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'message-content';
+
+      const badgeRow = document.createElement('div');
+      badgeRow.className = 'badge-row';
+      contentDiv.appendChild(badgeRow);
+
+      msgDiv.appendChild(avatar);
+      msgDiv.appendChild(contentDiv);
+      elements.chatMessages.appendChild(msgDiv);
+      scrollToBottom();
+
+      return { container: contentDiv, badges: badgeRow };
+    }
+
+    function addStreamLine(hostEl, tag, text, isFinal=false) {
+      const row = document.createElement('div');
+      row.className = 'stream-line' + (isFinal ? ' final' : '');
+
+      const badge = document.createElement('span');
+      badge.className = 'stream-tag';
+      badge.textContent = tag;
+
+      const body = document.createElement('span');
+      body.textContent = ' ' + (text || '');
+
+      row.appendChild(badge);
+      row.appendChild(body);
+      hostEl.appendChild(row);
+      scrollToBottom();
+    }
+
+    function addPill(container, kind, text) {
+      const pill = document.createElement('span');
+      pill.className = `pill ${kind||''}`;
+      pill.textContent = text;
+      container.appendChild(pill);
+    }
+
+    async function sendMessage() {
+      const text = elements.messageInput.value.trim();
+      if (!text || !isConnected) return;
+
+      addMessage('user', text);
+      elements.messageInput.value = '';
+      autoGrow(elements.messageInput);
+      elements.messageInput.disabled = true;
+      elements.sendBtn.disabled = true;
+      elements.typingIndicator.classList.add('active');
+      elements.rightPanel.classList.add('active-glow');
+
+      const assistant = addAssistantScaffold();
+
+      const st = getSessionState();
+      st.session_id = st.session_id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()));
+      st.history = Array.isArray(st.history) ? st.history : [];
+      st.history.push({ type: 'human', content: text });
+      saveSessionState(st);
+
+      try {
+        const resp = await fetch(apiEndpoint, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-Session-Id': st.session_id
+          },
+          body: JSON.stringify({ session_id: st.session_id, text, history: st.history })
+        });
+
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const ct = (resp.headers.get('content-type') || '').toLowerCase();
+
+        if (!ct.includes('text/event-stream')) {
+          await nonStreamFromResponse(resp, assistant);
+        } else {
+          await readStreamingObjects(resp.body, assistant);
+        }
+
+      } catch (err) {
+        addStreamLine(assistant.container, 'error', `Error: ${err.message}`);
+      } finally {
+        elements.typingIndicator.classList.remove('active');
+        elements.messageInput.disabled = false;
+        elements.sendBtn.disabled = false;
+        elements.messageInput.focus();
+        elements.rightPanel.classList.remove('active-glow');
+        scrollToBottom();
+      }
+    }
+
+    async function nonStreamFromResponse(resp, ui) {
+      const data = await resp.json();  
+      try {
+        const payload = JSON.parse(data.answer);
+        renderPayload(payload, ui);
+        const st = getSessionState();
+        st.history.push({ type: 'ai', content: payload.final_answer || '' });
+        if (payload && payload.decision) {
+          if (payload.decision.designation) st.last_designations = [payload.decision.designation];
+          if (payload.decision.field) st.last_field = payload.decision.field;
+        }
+        saveSessionState(st);
+      } catch {
+        addStreamLine(ui.container, 'final answer:', data.answer || 'No response', true);
+        const st = getSessionState();
+        st.history.push({ type: 'ai', content: data.answer || '' });
+        saveSessionState(st);
+      }
+    }
+
+    async function readStreamingObjects(stream, ui) {
+      const reader = stream.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        if (buffer.includes('\n')) {
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const rawLine of lines) {
+            const line = rawLine.trim();
+            if (!line) continue;
+            if (line.startsWith('data:')) {
+              const payload = line.slice(5).trim();
+              processMaybeJson(payload, ui);
+              continue;
+            }
+            processMaybeJson(line, ui);
+          }
+        }
+
+        const extracted = extractCompleteJsonObjects(buffer);
+        if (extracted.objects.length) {
+          for (const obj of extracted.objects) processMaybeJson(obj, ui);
+          buffer = extracted.remainder;
+        }
+      }
+
+      if (buffer.trim().length) processMaybeJson(buffer.trim(), ui);
+    }
+
+    function processMaybeJson(text, ui) {
+      try {
+        const obj = JSON.parse(text);
+
+        if (obj && typeof obj === 'object' && 'ok' in obj && 'answer' in obj) {
+          try {
+            const payload = JSON.parse(obj.answer);
+            renderPayload(payload, ui);
+            const st = getSessionState();
+            st.history.push({ type: 'ai', content: payload.final_answer || '' });
+            if (payload && payload.decision) {
+              if (payload.decision.designation) st.last_designations = [payload.decision.designation];
+              if (payload.decision.field) st.last_field = payload.decision.field;
+            }
+            saveSessionState(st);
+          } catch {
+            addStreamLine(ui.container, 'final answer:', obj.answer || 'No response', true);
+            const st = getSessionState();
+            st.history.push({ type: 'ai', content: obj.answer || '' });
+            saveSessionState(st);
+          }
+          return;
+        }
+
+        handleChunk(obj, ui);
+      } catch { }
+    }
+
+    function extractCompleteJsonObjects(buf) {
+      const out = [];
+      let depth = 0, inStr = false, esc = false;
+      let startIdx = -1;
+
+      for (let i = 0; i < buf.length; i++) {
+        const ch = buf[i];
+
+        if (inStr) {
+          if (esc) { esc = false; continue; }
+          if (ch === '\\') { esc = true; continue; }
+          if (ch === '"') { inStr = false; continue; }
+          continue;
+        }
+
+        if (ch === '"') { inStr = true; continue; }
+        if (ch === '{') {
+          if (depth === 0) startIdx = i;
+          depth++;
+        } else if (ch === '}') {
+          depth--;
+          if (depth === 0 && startIdx !== -1) {
+            out.push(buf.slice(startIdx, i + 1));
+            startIdx = -1;
+          }
+        }
+      }
+
+      let remainder = buf;
+      if (out.length) {
+        const lastObj = out[out.length - 1];
+        const lastIdx = buf.lastIndexOf(lastObj);
+        remainder = buf.slice(lastIdx + lastObj.length);
+      }
+      return { objects: out, remainder };
+    }
+
+    function handleChunk(chunk, ui) {
+      if (chunk && chunk.final_answer && chunk.decision) {
+        renderPayload(chunk, ui);
+        const st = getSessionState();
+        st.history.push({ type: 'ai', content: chunk.final_answer || '' });
+        if (chunk.decision) {
+          if (chunk.decision.designation) st.last_designations = [chunk.decision.designation];
+          if (chunk.decision.field) st.last_field = chunk.decision.field;
+        }
+        saveSessionState(st);
+        return;
+      }
+      
+      if (chunk && chunk.type && chunk.message) {
+        addStreamLine(ui.container, chunk.type, chunk.message);
+      }
+    }
+
+    function renderPayload(payload, ui) {
+      const conf = (payload.confidence || '').toLowerCase();
+      if (conf) addPill(ui.badges, conf==='high'?'good':(conf==='low'?'danger':'warn'), `Confidence: ${payload.confidence}`);
+      if (payload.grounding) {
+        addPill(ui.badges, payload.grounding.grounded ? 'good' : 'warn', 'Grounded: ' + payload.grounding.grounded);
+        addPill(ui.badges, payload.grounding.hallucination ? 'danger' : 'good', 'Hallucination: ' + payload.grounding.hallucination);
+      }
+      if (payload.safety && typeof payload.safety.malicious !== 'undefined') {
+        addPill(ui.badges, payload.safety.malicious ? 'danger' : 'good', 'Malicious: ' + payload.safety.malicious);
+      }
+
+      if (payload.reasoning) addStreamLine(ui.container, 'reasoning', payload.reasoning);
+      if (payload.decision) addStreamLine(ui.container, 'decision', JSON.stringify(payload.decision));
+      if (payload.tool_call) addStreamLine(ui.container, 'tool_call', JSON.stringify(payload.tool_call));
+
+      addStreamLine(ui.container, 'final answer:', payload.final_answer || 'No answer', true);
+    }
+
+    function scrollToBottom() {
+      elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+    }
+
+    function clearSession() {
+      clearSessionState();
+      elements.chatMessages.innerHTML = '';
+      const welcome = document.createElement('div');
+      welcome.className = 'welcome-message';
+      welcome.textContent = 'Welcome! Connect to the API and start chatting about SKF products.';
+      elements.chatMessages.appendChild(welcome);
+      alert('Session cleared for this tab.');
+    }
+  </script>
+
+  <script>
+  function appendEventRow(ev) {
+    if (!ev || !ev.type) return;
+    if (ev.type === "heartbeat") return; 
+
+    const row = document.createElement("div");
+    row.className = "log-line";
+
+    const tag = document.createElement("span");
+    tag.className = "log-tag";
+    tag.textContent = ev.type;
+    row.appendChild(tag);
+
+    if (ev.message) {
+      const msg = document.createElement("span");
+      msg.className = "log-msg";
+      msg.textContent = " " + ev.message;
+      row.appendChild(msg);
+    }
+
+    if (ev.type === "safety" && ev.data && typeof ev.data.malicious !== "undefined") {
+      const b = document.createElement("span");
+      b.className = "badge";
+      b.textContent = ` Malicious: ${ev.data.malicious ? "true" : "false"}`;
+      row.appendChild(b);
+    }
+    if (ev.type === "quality" && ev.data) {
+      const q = ev.data;
+      const b1 = document.createElement("span");
+      b1.className = "badge";
+      b1.textContent = ` Confidence: ${q.confidence ?? "Unknown"}`;
+      row.appendChild(b1);
+      if (typeof q.grounded !== "undefined") {
+        const b2 = document.createElement("span");
+        b2.className = "badge";
+        b2.textContent = ` Grounded: ${q.grounded}`;
+        row.appendChild(b2);
+      }
+      if (typeof q.hallucination !== "undefined") {
+        const b3 = document.createElement("span");
+        b3.className = "badge";
+        b3.textContent = ` Hallucination: ${q.hallucination}`;
+        row.appendChild(b3);
+      }
+    }
+
+    if (ev.data) {
+      const pre = document.createElement("pre");
+      pre.className = "log-json";
+      pre.textContent = JSON.stringify(ev.data, null, 2);
+      row.appendChild(pre);
+    }
+
+    if (ev.type === "final") row.classList.add("final-answer");
+
+    (document.querySelector("#logContainer") || document.body).appendChild(row);
+    row.scrollIntoView({ behavior: "smooth", block: "end" });
+  }
+
+
+</script>
+<script>
+  function getUploadEndpoint() {
+    try {
+      const url = new URL(apiEndpoint);
+      url.pathname = url.pathname.replace(/\/api\/chat.*/i, "/api/upload");
+      url.search = ""; // not streaming
+      return url.toString();
+    } catch {
+      return apiEndpoint.replace(/\/api\/chat.*/i, "/api/upload");
+    }
+  }
+
+  async function uploadJsonFile(file) {
+    const statusEl = elements.uploadStatus;
+    
+    if (!file) {
+      statusEl.textContent = "Please select a .json file.";
+      statusEl.style.color = "#f59e0b";
+      return;
+    }
+    if (!file.name.toLowerCase().endsWith(".json")) {
+      statusEl.textContent = "Only .json files are allowed.";
+      statusEl.style.color = "#ef4444";
+      return;
+    }
+
+    elements.uploadBtn.disabled = true;
+    elements.uploadBtn.textContent = "Uploading...";
+    statusEl.textContent = "Uploading...";
+    statusEl.style.color = "#9E9E9E";
+
+    try {
+      const text = await file.text(); 
+      const uploadUrl = getUploadEndpoint();
+
+      const res = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: file.name, content: text })
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        const msg = (data && data.error) ? data.error : `HTTP ${res.status}`;
+        statusEl.textContent = "Upload failed: " + msg;
+        statusEl.style.color = "#ef4444";
+      } else {
+        statusEl.textContent = `Uploaded ✓ (${data.bytes} bytes) → ${data.saved_to}`;
+        statusEl.style.color = "#10b981";
+        elements.fileInput.value = '';
+        elements.fileInputLabel.textContent = 'Choose JSON file...';
+        elements.fileInputLabel.classList.remove('has-file');
+      }
+    } catch (err) {
+      statusEl.textContent = "Upload error: " + err.message;
+      statusEl.style.color = "#ef4444";
+    } finally {
+      elements.uploadBtn.disabled = false;
+      elements.uploadBtn.textContent = "Upload";
+    }
+  }
+
+  elements.uploadBtn.addEventListener("click", () => {
+    const f = elements.fileInput.files?.[0];
+    uploadJsonFile(f);
+  });
+</script>
+
+<style>
+  .log-json { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; opacity: .9; margin-top: 6px; white-space: pre-wrap; }
+  .badge { margin-left: 8px; padding: 2px 6px; border-radius: 8px; border: 1px solid #444; font-size: 12px; opacity: .85; }
+  .final-answer { background: rgba(60,200,120,.06); border-left: 3px solid #2ecc71; padding-left: 6px; }
+</style>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "PYTHON_ISOLATE_WORKER_DEPENDENCIES": "1",
+    "OPENAI_API_TYPE": "azure",
+    "AZURE_OPENAI_ENDPOINT": "https://ai-conpandiyant8890ai659911714432.openai.azure.com/",
+    "AZURE_OPENAI_API_KEY": "22ozXPGBJqVV5SzZ1fPKKTDuRgv0t35yf0WTYCN9Mg88D1PVBStUJQQJ99BDACHYHv6XJ3w3AAAAACOG5vDe",
+    "AZURE_OPENAI_DEPLOYMENT": "gpt-4.1",
+    "PRODUCT_DATA_DIR": "D:\\AIWORK\\ai-product-agent\\data"
+  },
+  "ConnectionStrings": {},
+  "Host": {}
+}
