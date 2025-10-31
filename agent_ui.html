@@ -11,19 +11,18 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       height: 100vh;
       overflow: hidden;
-      background: #f6f6f6; /* updated */
-      color: #495057; /* updated */
+      background: #f6f6f6;
+      color: #495057;
     }
 
     .container { display: flex; height: 100vh; }
 
     .left-panel {
       width: 30%;
-      background: #fcfcfd; /* updated */
+      background: #fcfcfd;
       display: flex;
       flex-direction: column;
       padding: 20px;
-      
     }
     .connection-section { flex: 1; display: flex; flex-direction: column; }
     .connection-section h2 { font-size: 14px; margin-bottom: 20px; color: #495057; font-weight: 600; }
@@ -100,32 +99,30 @@
     .input-group { margin-bottom: 15px; }
     .input-group label { display: block; font-size: 12px; color: #495057; margin-bottom: 5px; font-weight: 500; }
     .input-group input {
-      width: 100%; padding: 10px; border: 1px solid #e2e3e5; /* updated */ border-radius: 6px;
-      font-size: 14px; transition: border-color 0.2s; background: #ffffff; color: #495057; /* updated */
+      width: 100%; padding: 10px; border: 1px solid #e2e3e5; border-radius: 6px;
+      font-size: 14px; transition: border-color 0.2s; background: #ffffff; color: #495057;
     }
-    .input-group input:focus { outline: none; border-color: #0000fe; /* updated */ }
+    .input-group input:focus { outline: none; border-color: #0000fe; }
 
     .connect-btn {
-      width: 100%; padding: 12px; background: #0000fe; /* updated */ color: #ffffff; border: none; border-radius: 6px;
+      width: 100%; padding: 12px; background: #0000fe; color: #ffffff; border: none; border-radius: 6px;
       font-size: 12px; font-weight: 400; cursor: pointer; transition: all 0.2s;
     }
-    .connect-btn:hover { background: #0000cc; /* slight hover */ }
-    .connect-btn:disabled { background: #e2e3e5; /* updated */ color: #8a8a8a; cursor: not-allowed; }
+    .connect-btn:hover { background: #0000cc; }
+    .connect-btn:disabled { background: #e2e3e5; color: #8a8a8a; cursor: not-allowed; }
 
     .status { margin-top: 15px; padding: 10px; border-radius: 6px; font-size: 12px; text-align: center; font-weight: 500; }
-    .status.connected { background: rgba(0, 0, 254, 0.06); color: #0000fe; border: 1px solid #0000fe; /* updated */ }
-    .status.disconnected { background: rgba(0,0,0,0.02); color: #9E9E9E; border: 1px solid #e2e3e5; /* updated */ }
-    .status.connecting { background: rgba(0, 0, 254, 0.10); color: #0000fe; border: 1px solid #0000fe; /* updated */ }
+    .status.connected { background: rgba(0, 0, 254, 0.06); color: #0000fe; border: 1px solid #0000fe; }
+    .status.disconnected { background: rgba(0,0,0,0.02); color: #9E9E9E; border: 1px solid #e2e3e5; }
+    .status.connecting { background: rgba(0, 0, 254, 0.10); color: #0000fe; border: 1px solid #0000fe; }
     .space-panel { width: 5%; background: #f6f6f6; flex: auto; flex-direction: column;z-index: 2;}
     .right-panel {
       width: 60%;
       display: flex;
       flex-direction: column;
-      background: #f6f6f6; /* updated */
+      background: #f6f6f6;
       position: relative;
       z-index: 2;
-
-      
     }
 
     @keyframes glowPulse {
@@ -166,11 +163,11 @@
       font-weight: 100; font-size: 14px; flex-shrink: 0;
       color: #ffffff;
     }
-    .message.user .message-avatar { background: #495057; /* updated to match text tone */ }
-    .message.assistant .message-avatar { background: #0000fe; /* updated */ }
+    .message.user .message-avatar { background: #495057; }
+    .message.assistant .message-avatar { background: #0000fe; }
 
-    .message-content { padding: 8px 8px; font-size: 14px; line-height: 1.5; word-wrap: break-word; color: #495057; /* updated */ }
-    .message.user .message-content { color: #495057; /* updated */ }
+    .message-content { padding: 8px 8px; font-size: 14px; line-height: 1.5; word-wrap: break-word; color: #495057; }
+    .message.user .message-content { color: #495057; }
 
     .typing-indicator { 
       display: none; 
@@ -183,33 +180,33 @@
       margin: 0 auto 15px auto;
     }
     .typing-indicator.active { display: block; }
-    .typing-indicator span { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #0000fe; /* updated */ margin-right: 4px; animation: bounce 1.4s infinite; }
+    .typing-indicator span { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #0000fe; margin-right: 4px; animation: bounce 1.4s infinite; }
     .typing-indicator span:nth-child(2) { animation-delay: .2s; }
     .typing-indicator span:nth-child(3) { animation-delay: .4s; }
     @keyframes bounce { 0%,60%,100%{ transform:translateY(0);} 30%{ transform:translateY(-8px);} }
 
-    .input-area { position: sticky; bottom: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #f5f5f5 20%); /* updated */ padding: 16px 16px; }
+    .input-area { position: sticky; bottom: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #f5f5f5 20%); padding: 16px 16px; }
     .input-container {
       display: flex; align-items: flex-end; gap: 10px; max-width: 780px; margin: 0 auto; padding: 8px;
-      border: 1px solid #e2e3e5; /* updated */ border-radius: 12px; background: #ffffff; box-shadow: 0 6px 24px rgba(220, 220, 220, 0.25);
+      border: 1px solid #e2e3e5; border-radius: 12px; background: #ffffff; box-shadow: 0 6px 24px rgba(220, 220, 220, 0.25);
       transition: border-color .2s, box-shadow .2s;
     }
-    .input-container:focus-within { border-color: #e2e3e5; /* updated */ box-shadow: 0 0 0 1px #d9dadc; /* subtle */
+    .input-container:focus-within { border-color: #e2e3e5; box-shadow: 0 0 0 1px #d9dadc;
     transition: border-color .2s, box-shadow .2s; }
     .input-container textarea {
-      flex: 1; border: none; outline: none; background: transparent; color: #495057; /* updated */
-      font-size: 14px; line-height: 1.5; padding: 10px 12px; resize: none; max-height: 160px; overflow-y: auto; caret-color: #0000fe; /* updated */
+      flex: 1; border: none; outline: none; background: transparent; color: #495057;
+      font-size: 14px; line-height: 1.5; padding: 10px 12px; resize: none; max-height: 160px; overflow-y: auto; caret-color: #0000fe;
     }
     .input-container textarea::placeholder { color: #9E9E9E; }
 
     .send-btn {
-      padding: 10px 16px; background: #ffffff; /* updated */ color: #0000fe; border: none; border-radius: 12px; font-size: 20px; 
+      padding: 10px 16px; background: #ffffff; color: #0000fe; border: none; border-radius: 12px; font-size: 20px; 
       font-weight: 800;
       cursor: pointer; transition: background .2s, transform .05s; flex-shrink: 0;
     }
     .send-btn:hover:not(:disabled) { background: #ffffff; }
     .send-btn:active:not(:disabled) { transform: translateY(1px); }
-    .send-btn:disabled { background: #ffffff; /* updated */ color: #9E9E9E; cursor: not-allowed; }
+    .send-btn:disabled { background: #ffffff; color: #9E9E9E; cursor: not-allowed; }
 
     .welcome-message { 
       text-align: center; 
@@ -230,6 +227,8 @@
     .pill.good { color:#10b981; border-color:#10b981; background:#f5f5f5; }
     .pill.warn { color:#f59e0b; border-color:#f59e0b; background:#f5f5f5; }
     .pill.danger { color:#ef4444; border-color:#ef4444; background:#f5f5f5; }
+    .pill.critical { color:#ffffff; border-color:#dc2626; background:#dc2626; font-weight: 600; }
+    .pill.info { color:#3b82f6; border-color:#3b82f6; background:#f5f5f5; }
 
     .stream-line{line-height: 0.5 ; padding:6px 8px;margin-top:1px;background:none;border:0px solid #1f2937;border-radius:1px;overflow-wrap:anywhere;font-size:12px;color:#393939 }
     .stream-line .stream-tag{ display:inline-block;font-size:14px;padding:2px 6px;margin-right:8px;border-radius:8px;border:0px solid #1f3b66;background:none;color:#393939 }
@@ -264,15 +263,12 @@
         </div>
         <div class="app-title">
           <h3>SKF Product Assistant - AI Agent</h3>
-          <p>Powered by Python, Langgraph, and Azure Functions
-            
-          </p>
+          <p>Powered by Python, Langgraph, and Azure Functions</p>
         </div>
       </div>
     </div>
      
     <div class="right-panel" id="rightPanel">
-      
         <div class="chat-messages" id="chatMessages">
           <div class="welcome-message">Welcome! Connect to the API and start chatting about SKF products.</div>
         </div>
@@ -286,8 +282,6 @@
           </div>
         </div>
     </div>
-     
-
   </div>
 
 <script>
@@ -661,15 +655,56 @@
     function renderPayload(payload, ui) {
       const conf = (payload.confidence || '').toLowerCase();
       if (conf) addPill(ui.badges, conf==='high'?'good':(conf==='low'?'danger':'warn'), `Confidence: ${payload.confidence}`);
+      
       if (payload.grounding) {
         addPill(ui.badges, payload.grounding.grounded ? 'good' : 'warn', 'Grounded: ' + payload.grounding.grounded);
         addPill(ui.badges, payload.grounding.hallucination ? 'danger' : 'good', 'Hallucination: ' + payload.grounding.hallucination);
       }
+      
       if (payload.safety && typeof payload.safety.malicious !== 'undefined') {
         addPill(ui.badges, payload.safety.malicious ? 'danger' : 'good', 'Malicious: ' + payload.safety.malicious);
+        
+        if (payload.safety.severity) {
+          const severityClass = 
+            payload.safety.severity === 'critical' ? 'critical' :
+            payload.safety.severity === 'high' ? 'danger' :
+            payload.safety.severity === 'medium' ? 'warn' : 'info';
+          addPill(ui.badges, severityClass, `Severity: ${payload.safety.severity}`);
+        }
+        
+        if (payload.safety.violations && payload.safety.violations.length > 0) {
+          addPill(ui.badges, 'danger', `Violations: ${payload.safety.violations.length}`);
+        }
+        
+        if (payload.safety.output_filtered) {
+          addPill(ui.badges, 'warn', 'Output Filtered');
+        }
+        
+        if (payload.safety.off_topic) {
+          addPill(ui.badges, 'warn', 'Off-Topic Detected');
+        }
+        
+        if (payload.safety.output_issues && payload.safety.output_issues.length > 0) {
+          addPill(ui.badges, 'warn', `Issues: ${payload.safety.output_issues.length}`);
+        }
+      }
+      
+      if (payload.grounding && typeof payload.grounding.confidence !== 'undefined') {
+        const confValue = payload.grounding.confidence;
+        const confClass = confValue >= 0.7 ? 'good' : confValue >= 0.4 ? 'warn' : 'danger';
+        addPill(ui.badges, confClass, `Grounding Score: ${(confValue * 100).toFixed(0)}%`);
       }
 
       if (payload.reasoning) addStreamLine(ui.container, 'reasoning', payload.reasoning);
+      
+      if (payload.safety && payload.safety.reason) {
+        addStreamLine(ui.container, 'safety reason', payload.safety.reason);
+      }
+      
+      if (payload.safety && payload.safety.violations && payload.safety.violations.length > 0) {
+        addStreamLine(ui.container, 'violations', payload.safety.violations.join(', '));
+      }
+      
       if (payload.decision) addStreamLine(ui.container, 'decision', JSON.stringify(payload.decision));
       if (payload.tool_call) addStreamLine(ui.container, 'tool_call', JSON.stringify(payload.tool_call));
 
@@ -692,72 +727,11 @@
   </script>
 
   <script>
-  function appendEventRow(ev) {
-    if (!ev || !ev.type) return;
-    if (ev.type === "heartbeat") return; 
-
-    const row = document.createElement("div");
-    row.className = "log-line";
-
-    const tag = document.createElement("span");
-    tag.className = "log-tag";
-    tag.textContent = ev.type;
-    row.appendChild(tag);
-
-    if (ev.message) {
-      const msg = document.createElement("span");
-      msg.className = "log-msg";
-      msg.textContent = " " + ev.message;
-      row.appendChild(msg);
-    }
-
-    if (ev.type === "safety" && ev.data && typeof ev.data.malicious !== "undefined") {
-      const b = document.createElement("span");
-      b.className = "badge";
-      b.textContent = ` Malicious: ${ev.data.malicious ? "true" : "false"}`;
-      row.appendChild(b);
-    }
-    if (ev.type === "quality" && ev.data) {
-      const q = ev.data;
-      const b1 = document.createElement("span");
-      b1.className = "badge";
-      b1.textContent = ` Confidence: ${q.confidence ?? "Unknown"}`;
-      row.appendChild(b1);
-      if (typeof q.grounded !== "undefined") {
-        const b2 = document.createElement("span");
-        b2.className = "badge";
-        b2.textContent = ` Grounded: ${q.grounded}`;
-        row.appendChild(b2);
-      }
-      if (typeof q.hallucination !== "undefined") {
-        const b3 = document.createElement("span");
-        b3.className = "badge";
-        b3.textContent = ` Hallucination: ${q.hallucination}`;
-        row.appendChild(b3);
-      }
-    }
-
-    if (ev.data) {
-      const pre = document.createElement("pre");
-      pre.className = "log-json";
-      pre.textContent = JSON.stringify(ev.data, null, 2);
-      row.appendChild(pre);
-    }
-
-    if (ev.type === "final") row.classList.add("final-answer");
-
-    (document.querySelector("#logContainer") || document.body).appendChild(row);
-    row.scrollIntoView({ behavior: "smooth", block: "end" });
-  }
-
-
-</script>
-<script>
   function getUploadEndpoint() {
     try {
       const url = new URL(apiEndpoint);
       url.pathname = url.pathname.replace(/\/api\/chat.*/i, "/api/upload");
-      url.search = ""; // not streaming
+      url.search = "";
       return url.toString();
     } catch {
       return apiEndpoint.replace(/\/api\/chat.*/i, "/api/upload");

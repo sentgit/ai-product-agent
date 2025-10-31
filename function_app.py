@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 import azure.functions as func
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
 from agent.graph import GRAPH
+from shared.comprehensive_guardrails import ComprehensiveGuardrails, apply_all_guardrails
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -18,10 +19,6 @@ def _cors():
     }
 
 def _extract_metadata_from_answer(answer: str, messages: List[Any]) -> Dict[str, Any]:
-    """
-    POST-LLM VALIDATION: Extract confidence, grounding, hallucination from LLM response.
-    This validates the QUALITY of the answer, not the safety of the input.
-    """
     confidence = "Unknown"
     conf_match = re.search(r'Confidence:\s*([0-9.]+|High|Medium|Low)', answer, re.IGNORECASE)
     if conf_match:
@@ -72,7 +69,6 @@ def _extract_metadata_from_answer(answer: str, messages: List[Any]) -> Dict[str,
     
     hallucination = not grounded or has_no_evidence
     
-    
     return {
         "confidence": confidence_label,
         "grounding": {
@@ -80,46 +76,11 @@ def _extract_metadata_from_answer(answer: str, messages: List[Any]) -> Dict[str,
             "hallucination": hallucination
         },
         "safety": {
-            "malicious": False  
+            "malicious": False
         },
         "tools_used": tools_used,
         "evidence": evidence
     }
-
-def _check_malicious_input(text: str) -> tuple[bool, str]:
-    """
-    Check if user input contains malicious intent.
-    Returns (is_malicious: bool, reason: str)
-    """
-    if not text:
-        return False, ""
-    
-    lower = text.lower()
-    
-    malicious_patterns = [
-        ("hack", "unauthorized access attempts"),
-        ("password", "attempting to access credentials"),
-        ("credit card", "requesting sensitive financial data"),
-        ("bank", "banking credential requests"),
-        ("login", "login credential requests"),
-        ("bypass", "security bypass attempts"),
-        ("exploit", "exploitation attempts"),
-        ("ddos", "denial of service attempts"),
-        ("steal", "data theft attempts"),
-        ("token", "authentication token requests"),
-        ("api key", "API key theft attempts"),
-        ("credentials", "credential theft attempts"),
-        ("drop table", "SQL injection attempts"),
-        ("' or '1'='1", "SQL injection attempts"),
-        ("rm -rf", "destructive system commands"),
-        ("delete *", "destructive operations"),
-    ]
-    
-    for keyword, reason in malicious_patterns:
-        if keyword in lower:
-            return True, reason
-    
-    return False, ""
 
 @app.function_name(name="chat")
 @app.route(route="chat", methods=["POST", "OPTIONS"])
@@ -135,14 +96,11 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
     user_text = (body.get("text") or "").strip()
     session_id = (body.get("session_id") or req.headers.get("x-session-id") or "default").strip() or "default"
     
-    is_malicious, malicious_reason = _check_malicious_input(user_text)
+    guardrails = ComprehensiveGuardrails()
+    input_check = guardrails.check_input_safety(user_text)
     
-    if is_malicious:
-        refusal_message = (
-            "I cannot assist with this request. "
-            "I'm designed to provide product information only and cannot help with "
-            "unauthorized access, hacking, or requests involving sensitive credentials."
-        )
+    if not input_check["safe"]:
+        refusal_message = "I cannot process this request due to safety concerns."
         
         payload = {
             "final_answer": refusal_message,
@@ -153,9 +111,11 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             },
             "safety": {
                 "malicious": True,
-                "reason": malicious_reason
+                "severity": input_check["severity"],
+                "violations": input_check["violations"],
+                "reason": input_check["reason"]
             },
-            "reasoning": f"Blocked request: {malicious_reason}",
+            "reasoning": f"Blocked request: {input_check['reason']}",
             "decision": {
                 "tool": "safety_filter",
                 "designation": None,
@@ -193,7 +153,25 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
     else:
         content = getattr(final, "content", "") or ""
     
+    output_check = guardrails.check_output_safety(content, user_text)
+    
+    if not output_check["safe"]:
+        content = output_check["filtered_answer"]
+    
+    appropriateness = guardrails.check_context_appropriateness(user_text, content)
+    
+    if not appropriateness["appropriate"]:
+        content = appropriateness["suggested_response"]
+    
     metadata = _extract_metadata_from_answer(content, SESSION_STORE[session_id])
+    
+    if not output_check["safe"]:
+        metadata["safety"]["output_issues"] = output_check["issues"]
+        metadata["safety"]["output_filtered"] = True
+    
+    if not appropriateness["appropriate"]:
+        metadata["safety"]["off_topic"] = True
+        metadata["safety"]["off_topic_reason"] = appropriateness["reason"]
     
     payload = {
         "final_answer": content,
@@ -203,7 +181,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         "reasoning": f"Used tools: {', '.join(metadata['tools_used']) if metadata['tools_used'] else 'none'}",
         "decision": {
             "tool": metadata["tools_used"][0] if metadata["tools_used"] else "no_tool",
-            "designation": None,  
+            "designation": None,
             "field": None
         },
         "tool_call": {
@@ -223,7 +201,6 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
 @app.function_name(name="clear_session")
 @app.route(route="clear_session", methods=["POST", "OPTIONS"])
 def clear_session(req: func.HttpRequest) -> func.HttpResponse:
-    """Optional endpoint to clear a session"""
     if req.method == "OPTIONS":
         return func.HttpResponse("", status_code=204, headers=_cors())
     
@@ -249,7 +226,6 @@ def clear_session(req: func.HttpRequest) -> func.HttpResponse:
 @app.function_name(name="debug_kv")
 @app.route(route="debug_kv", methods=["POST", "OPTIONS"])
 def debug_kv(req: func.HttpRequest) -> func.HttpResponse:
-    """Debug endpoint to see raw KV tool output"""
     if req.method == "OPTIONS":
         return func.HttpResponse("", status_code=204, headers=_cors())
     
@@ -273,7 +249,6 @@ def debug_kv(req: func.HttpRequest) -> func.HttpResponse:
 @app.function_name(name="upload")
 @app.route(route="upload", methods=["POST", "OPTIONS"])
 def upload(req: func.HttpRequest) -> func.HttpResponse:
-    """Upload product JSON files to the data directory"""
     if req.method == "OPTIONS":
         return func.HttpResponse("", status_code=204, headers=_cors())
     
